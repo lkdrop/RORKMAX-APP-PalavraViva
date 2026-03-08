@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var showGabriel: Bool = false
     @State private var showDailyReminder: Bool = false
     @State private var isLiked: Bool = false
+    @State private var planProgress = PlanProgressManager.shared
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -411,50 +412,70 @@ struct HomeView: View {
     }
 
     private var activePlanCards: some View {
-        VStack(spacing: 12) {
-            ForEach(activePlans, id: \.title) { plan in
-                Button {} label: {
-                    HStack(spacing: 14) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack(spacing: 6) {
-                                Image(systemName: "checkmark.square")
-                                    .font(.caption2)
-                                Text("Dia \(plan.currentDay)")
-                                    .font(.caption)
+        let activeIds = Array(planProgress.activePlans.keys)
+        return Group {
+            if !activeIds.isEmpty {
+                VStack(spacing: 12) {
+                    ForEach(activeIds, id: \.self) { planId in
+                        if let plan = ReadingPlanProvider.plan(byId: planId),
+                           let progress = planProgress.progress(for: planId) {
+                            NavigationLink {
+                                PlanDetailView(plan: plan)
+                            } label: {
+                                HStack(spacing: 14) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: "checkmark.square")
+                                                .font(.caption2)
+                                            Text("Dia \(progress.currentDay) de \(plan.totalDays)")
+                                                .font(.caption)
+                                        }
+                                        .foregroundStyle(.secondary)
+
+                                        Text(plan.title)
+                                            .font(.subheadline.bold())
+                                            .foregroundStyle(.white)
+                                            .lineLimit(2)
+
+                                        ProgressView(value: Double(progress.currentDay - 1), total: Double(plan.totalDays))
+                                            .tint(Color(red: 0.95, green: 0.3, blue: 0.35))
+                                    }
+
+                                    Spacer()
+
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(categoryColor(for: plan.category))
+                                            .frame(width: 72, height: 72)
+                                        Image(systemName: plan.category.icon)
+                                            .font(.title2)
+                                            .foregroundStyle(.white.opacity(0.8))
+                                    }
+                                }
+                                .padding(16)
+                                .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
                             }
-                            .foregroundStyle(.secondary)
-
-                            Text(plan.title)
-                                .font(.subheadline.bold())
-                                .foregroundStyle(.white)
-                                .lineLimit(2)
-                        }
-
-                        Spacer()
-
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(plan.color)
-                                .frame(width: 72, height: 72)
-                            Image(systemName: plan.icon)
-                                .font(.title2)
-                                .foregroundStyle(.white.opacity(0.8))
+                            .buttonStyle(.plain)
                         }
                     }
-                    .padding(16)
-                    .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
                 }
-                .buttonStyle(.plain)
+                .padding(.horizontal, 16)
             }
         }
-        .padding(.horizontal, 16)
     }
 
-    private var activePlans: [ActivePlan] {
-        [
-            ActivePlan(title: "Entre os Anjos", currentDay: 3, icon: "sparkles", color: Color(red: 0.3, green: 0.25, blue: 0.6)),
-            ActivePlan(title: "Entre os Anjos", currentDay: 3, icon: "sparkles", color: Color(red: 0.3, green: 0.25, blue: 0.6)),
-        ]
+    private func categoryColor(for category: PlanCategory) -> Color {
+        switch category {
+        case .amor: return Color(red: 0.91, green: 0.28, blue: 0.33)
+        case .cura: return Color(red: 0.36, green: 0.66, blue: 0.55)
+        case .esperanca: return Color(red: 0.96, green: 0.64, blue: 0.38)
+        case .ansiedade: return Color(red: 0.48, green: 0.41, blue: 0.68)
+        case .raiva: return Color(red: 0.84, green: 0.25, blue: 0.27)
+        case .depressao: return Color(red: 0.42, green: 0.48, blue: 0.58)
+        case .fe: return Color(red: 0.83, green: 0.63, blue: 0.35)
+        case .familia: return Color(red: 0.31, green: 0.8, blue: 0.77)
+        case .oracao: return Color(red: 0.61, green: 0.49, blue: 0.85)
+        }
     }
 
     private var devotionalCard: some View {
@@ -651,13 +672,6 @@ struct HomeView: View {
             .padding(.horizontal, 16)
         }
     }
-}
-
-struct ActivePlan {
-    let title: String
-    let currentDay: Int
-    let icon: String
-    let color: Color
 }
 
 struct QuickBookCard: View {
