@@ -244,20 +244,28 @@ struct HomeView: View {
 
                 Spacer()
 
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(
-                            LinearGradient(
-                                colors: [Color(red: 0.55, green: 0.4, blue: 0.35), Color(red: 0.4, green: 0.3, blue: 0.28)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 80, height: 80)
-                    Image(systemName: "hands.sparkles")
-                        .font(.title2)
-                        .foregroundStyle(.white.opacity(0.8))
-                }
+                Color(red: 0.15, green: 0.13, blue: 0.12)
+                    .frame(width: 80, height: 80)
+                    .overlay {
+                        AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=400&q=80")) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                            }
+                        }
+                        .allowsHitTesting(false)
+                    }
+                    .overlay {
+                        Color.black.opacity(0.25).allowsHitTesting(false)
+                    }
+                    .overlay {
+                        Image(systemName: "hands.sparkles")
+                            .font(.title2)
+                            .foregroundStyle(.white.opacity(0.8))
+                    }
+                    .clipShape(.rect(cornerRadius: 12))
             }
             .padding(16)
             .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
@@ -268,80 +276,102 @@ struct HomeView: View {
 
     private var verseOfDayCard: some View {
         let daily = viewModel.dailyVerse
-        return VStack(alignment: .leading, spacing: 14) {
-            Text("Versículo do Dia")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white.opacity(0.7))
-
-            Text(daily.reference)
-                .font(.title3.bold())
-                .foregroundStyle(.white)
-
-            Text("\u{201C}\(daily.verse.text)\u{201D}")
-                .font(.system(.body, design: .serif))
-                .foregroundStyle(.white.opacity(0.9))
-                .lineSpacing(6)
-                .opacity(animateVerse ? 1 : 0)
-                .offset(y: animateVerse ? 0 : 8)
-
-            HStack(spacing: 24) {
-                Button {
-                    withAnimation(.spring(duration: 0.3)) { isLiked.toggle() }
-                } label: {
-                    actionButton(icon: isLiked ? "heart.fill" : "heart", count: "323,4 mil", highlighted: isLiked)
-                }
-                actionButton(icon: "bubble.right", count: "5.877")
-                actionButton(icon: "square.and.arrow.up", count: "92,3 mil")
-                
-                Spacer()
-                
-                Button {
-                    audioService.speak(daily.verse.text)
-                } label: {
-                    Image(systemName: audioService.isSpeakingText(daily.verse.text) ? "pause.fill" : "speaker.wave.2")
-                        .font(.caption)
-                        .foregroundStyle(audioService.isSpeakingText(daily.verse.text) ? Color(red: 0.95, green: 0.3, blue: 0.35) : .white.opacity(0.6))
-                }
-            }
-            .padding(.top, 4)
-
-            HStack(spacing: 10) {
-                Button {
-                    showDailyReminder = true
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                            .font(.caption)
-                        Text("Envie-me Diariamente")
-                            .font(.caption.bold())
+        let verseImageURL = "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80"
+        return VStack(alignment: .leading, spacing: 0) {
+            Color(red: 0.15, green: 0.12, blue: 0.1)
+                .frame(height: 160)
+                .overlay {
+                    AsyncImage(url: URL(string: verseImageURL)) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .transition(.opacity.animation(.easeOut(duration: 0.4)))
+                        }
                     }
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .background(.white, in: Capsule())
+                    .allowsHitTesting(false)
                 }
+                .overlay {
+                    LinearGradient(
+                        colors: [.clear, Color(red: 0.12, green: 0.1, blue: 0.09)],
+                        startPoint: .center,
+                        endPoint: .bottom
+                    )
+                    .allowsHitTesting(false)
+                }
+                .overlay(alignment: .topLeading) {
+                    Text("VERSÍCULO DO DIA")
+                        .font(.caption2.bold())
+                        .tracking(1.2)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .padding(14)
+                }
+                .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
 
-                Button {} label: {
-                    Image(systemName: "xmark")
-                        .font(.caption.bold())
-                        .foregroundStyle(.secondary)
-                        .frame(width: 36, height: 36)
-                        .background(Color(red: 0.2, green: 0.18, blue: 0.16), in: Circle())
+            VStack(alignment: .leading, spacing: 14) {
+                Text(daily.reference)
+                    .font(.title3.bold())
+                    .foregroundStyle(.white)
+
+                Text("\u{201C}\(daily.verse.text)\u{201D}")
+                    .font(.system(.body, design: .serif))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .lineSpacing(6)
+                    .opacity(animateVerse ? 1 : 0)
+                    .offset(y: animateVerse ? 0 : 8)
+
+                HStack(spacing: 24) {
+                    Button {
+                        withAnimation(.spring(duration: 0.3)) { isLiked.toggle() }
+                    } label: {
+                        actionButton(icon: isLiked ? "heart.fill" : "heart", count: "323,4 mil", highlighted: isLiked)
+                    }
+                    actionButton(icon: "bubble.right", count: "5.877")
+                    actionButton(icon: "square.and.arrow.up", count: "92,3 mil")
+
+                    Spacer()
+
+                    Button {
+                        audioService.speak(daily.verse.text)
+                    } label: {
+                        Image(systemName: audioService.isSpeakingText(daily.verse.text) ? "pause.fill" : "speaker.wave.2")
+                            .font(.caption)
+                            .foregroundStyle(audioService.isSpeakingText(daily.verse.text) ? Color(red: 0.95, green: 0.3, blue: 0.35) : .white.opacity(0.6))
+                    }
+                }
+                .padding(.top, 4)
+
+                HStack(spacing: 10) {
+                    Button {
+                        showDailyReminder = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                                .font(.caption)
+                            Text("Envie-me Diariamente")
+                                .font(.caption.bold())
+                        }
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(.white, in: Capsule())
+                    }
+
+                    Button {} label: {
+                        Image(systemName: "xmark")
+                            .font(.caption.bold())
+                            .foregroundStyle(.secondary)
+                            .frame(width: 36, height: 36)
+                            .background(Color(red: 0.2, green: 0.18, blue: 0.16), in: Circle())
+                    }
                 }
             }
+            .padding(20)
         }
-        .padding(20)
-        .background {
-            ZStack {
-                Color(red: 0.15, green: 0.12, blue: 0.1)
-                LinearGradient(
-                    colors: [Color(red: 0.3, green: 0.2, blue: 0.1).opacity(0.6), .clear],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            }
-            .clipShape(.rect(cornerRadius: 16))
-        }
+        .background(Color(red: 0.12, green: 0.1, blue: 0.09), in: RoundedRectangle(cornerRadius: 16))
         .padding(.horizontal, 16)
         .sensoryFeedback(.selection, trigger: isLiked)
     }
@@ -395,14 +425,28 @@ struct HomeView: View {
 
                 Spacer()
 
-                ZStack {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(red: 0.25, green: 0.2, blue: 0.18))
-                        .frame(width: 80, height: 80)
-                    Image(systemName: "book.and.wrench")
-                        .font(.title2)
-                        .foregroundStyle(Color(red: 0.85, green: 0.65, blue: 0.35))
-                }
+                Color(red: 0.15, green: 0.13, blue: 0.12)
+                    .frame(width: 80, height: 80)
+                    .overlay {
+                        AsyncImage(url: URL(string: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=400&q=80")) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                            }
+                        }
+                        .allowsHitTesting(false)
+                    }
+                    .overlay {
+                        Color.black.opacity(0.25).allowsHitTesting(false)
+                    }
+                    .overlay {
+                        Image(systemName: "book.and.wrench")
+                            .font(.title2)
+                            .foregroundStyle(Color(red: 0.85, green: 0.65, blue: 0.35))
+                    }
+                    .clipShape(.rect(cornerRadius: 12))
             }
             .padding(16)
             .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
@@ -443,14 +487,28 @@ struct HomeView: View {
 
                                     Spacer()
 
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(categoryColor(for: plan.category))
-                                            .frame(width: 72, height: 72)
-                                        Image(systemName: plan.category.icon)
-                                            .font(.title2)
-                                            .foregroundStyle(.white.opacity(0.8))
-                                    }
+                                    Color(red: 0.15, green: 0.13, blue: 0.12)
+                                        .frame(width: 72, height: 72)
+                                        .overlay {
+                                            AsyncImage(url: URL(string: plan.category.imageURL)) { phase in
+                                                if let image = phase.image {
+                                                    image
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                                                }
+                                            }
+                                            .allowsHitTesting(false)
+                                        }
+                                        .overlay {
+                                            Color.black.opacity(0.2).allowsHitTesting(false)
+                                        }
+                                        .overlay {
+                                            Image(systemName: plan.category.icon)
+                                                .font(.title2)
+                                                .foregroundStyle(.white.opacity(0.8))
+                                        }
+                                        .clipShape(.rect(cornerRadius: 10))
                                 }
                                 .padding(16)
                                 .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))

@@ -49,19 +49,28 @@ struct PlanCategoryView: View {
 
     private func planListRow(plan: ReadingPlan) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                Color(red: 0.18, green: 0.16, blue: 0.15)
-                    .frame(width: 90, height: 90)
-                    .overlay {
-                        categoryGradient(for: plan.category)
-                            .allowsHitTesting(false)
+            Color(red: 0.18, green: 0.16, blue: 0.15)
+                .frame(width: 90, height: 90)
+                .overlay {
+                    AsyncImage(url: URL(string: plan.imageURL ?? plan.category.imageURL)) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                        }
                     }
-                    .clipShape(.rect(cornerRadius: 10))
-
-                Image(systemName: plan.category.icon)
-                    .font(.title2)
-                    .foregroundStyle(.white.opacity(0.85))
-            }
+                    .allowsHitTesting(false)
+                }
+                .overlay {
+                    Color.black.opacity(0.2).allowsHitTesting(false)
+                }
+                .overlay {
+                    Image(systemName: plan.category.icon)
+                        .font(.title2)
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                .clipShape(.rect(cornerRadius: 10))
 
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(plan.totalDays) Dias")

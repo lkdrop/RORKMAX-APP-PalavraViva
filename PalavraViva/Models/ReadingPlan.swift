@@ -55,6 +55,20 @@ nonisolated enum PlanCategory: String, CaseIterable, Sendable {
         }
     }
 
+    var imageURL: String {
+        switch self {
+        case .amor: return "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80"
+        case .cura: return "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80"
+        case .esperanca: return "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800&q=80"
+        case .ansiedade: return "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80"
+        case .raiva: return "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=800&q=80"
+        case .depressao: return "https://images.unsplash.com/photo-1499346030926-9a72daac6c63?w=800&q=80"
+        case .fe: return "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80"
+        case .familia: return "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&q=80"
+        case .oracao: return "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80"
+        }
+    }
+
     var gradientColors: (start: String, end: String) {
         switch self {
         case .amor: return ("#E84855", "#C62839")

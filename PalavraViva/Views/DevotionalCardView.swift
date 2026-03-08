@@ -13,6 +13,7 @@ struct DevotionalCardView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            devotionalImageHeader
             headerSection
             scriptureSection
             if isExpanded {
@@ -24,6 +25,41 @@ struct DevotionalCardView: View {
             actionBar
         }
         .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var devotionalImageHeader: some View {
+        Color(red: 0.15, green: 0.13, blue: 0.12)
+            .frame(height: 140)
+            .overlay {
+                AsyncImage(url: URL(string: devotional.imageURL)) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .transition(.opacity.animation(.easeOut(duration: 0.4)))
+                    }
+                }
+                .allowsHitTesting(false)
+            }
+            .overlay {
+                LinearGradient(
+                    colors: [.clear, Color(red: 0.12, green: 0.12, blue: 0.14)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .allowsHitTesting(false)
+            }
+            .overlay(alignment: .topLeading) {
+                Text(devotional.theme.uppercased())
+                    .font(.caption2.bold())
+                    .tracking(1)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding(14)
+            }
+            .clipShape(.rect(topLeadingRadius: 16, topTrailingRadius: 16))
     }
 
     private var headerSection: some View {

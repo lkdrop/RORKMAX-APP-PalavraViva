@@ -8,6 +8,42 @@ nonisolated struct Devotional: Identifiable, Sendable {
     let reflection: String
     let prayer: String
     let theme: String
+
+    var imageURL: String {
+        let themeImages: [String: String] = [
+            "Confiança": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+            "Força": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80",
+            "Descanso": "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+            "Coragem": "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=800&q=80",
+            "Amor": "https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&q=80",
+            "Sabedoria": "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80",
+            "Graça": "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800&q=80",
+            "Renovação": "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=800&q=80",
+            "Direção": "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=800&q=80",
+            "Paz": "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&q=80",
+            "Paciência": "https://images.unsplash.com/photo-1499346030926-9a72daac6c63?w=800&q=80",
+            "Identidade": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
+            "Espírito": "https://images.unsplash.com/photo-1476842634003-7dcca8f832de?w=800&q=80",
+            "Perdão": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80",
+            "Proteção": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+            "Gratidão": "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?w=800&q=80",
+            "Consolo": "https://images.unsplash.com/photo-1468276311594-df7cb65d8df6?w=800&q=80",
+            "Busca": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800&q=80",
+            "Perseverança": "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&q=80",
+            "Humildade": "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80",
+            "Decisão": "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=800&q=80",
+            "Propósito": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&q=80",
+            "Transformação": "https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=800&q=80",
+            "Plenitude": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=800&q=80",
+            "Tempo": "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=800&q=80",
+            "Comunhão": "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=800&q=80",
+            "Fidelidade": "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800&q=80",
+            "Refúgio": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&q=80",
+            "Vitória": "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&q=80",
+            "Eternidade": "https://images.unsplash.com/photo-1499346030926-9a72daac6c63?w=800&q=80"
+        ]
+        return themeImages[theme] ?? "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800&q=80"
+    }
 }
 
 nonisolated enum DevotionalProvider: Sendable {

@@ -109,30 +109,43 @@ struct PlansView: View {
 
     private func featuredCard(plan: ReadingPlan) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .bottomLeading) {
-                Color(red: 0.18, green: 0.16, blue: 0.14)
-                    .frame(height: 180)
-                    .overlay {
-                        categoryGradient(for: plan.category)
-                            .allowsHitTesting(false)
+            Color(red: 0.18, green: 0.16, blue: 0.14)
+                .frame(height: 180)
+                .overlay {
+                    AsyncImage(url: URL(string: plan.imageURL ?? plan.category.imageURL)) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .transition(.opacity.animation(.easeOut(duration: 0.4)))
+                        }
                     }
-                    .overlay(alignment: .bottomTrailing) {
-                        Image(systemName: plan.category.icon)
-                            .font(.system(size: 50))
-                            .foregroundStyle(.white.opacity(0.12))
-                            .padding(16)
-                    }
-                    .overlay(alignment: .topLeading) {
-                        Text("\(plan.totalDays) Dias")
-                            .font(.caption2.bold())
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(.ultraThinMaterial, in: Capsule())
-                            .padding(12)
-                    }
-                    .clipShape(.rect(cornerRadius: 14))
-            }
+                    .allowsHitTesting(false)
+                }
+                .overlay {
+                    LinearGradient(
+                        colors: [.black.opacity(0.1), .black.opacity(0.55)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .allowsHitTesting(false)
+                }
+                .clipShape(.rect(cornerRadius: 14))
+                .overlay(alignment: .topLeading) {
+                    Text("\(plan.totalDays) Dias")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .padding(12)
+                }
+                .overlay(alignment: .bottomLeading) {
+                    Image(systemName: plan.category.icon)
+                        .font(.system(size: 28))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .padding(14)
+                }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(plan.title)
@@ -164,20 +177,33 @@ struct PlansView: View {
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                 ForEach(PlanCategory.allCases, id: \.rawValue) { category in
                     NavigationLink(value: category) {
-                        VStack(spacing: 8) {
-                            Image(systemName: category.icon)
-                                .font(.title3)
-                                .foregroundStyle(.white)
-                            Text(category.rawValue)
-                                .font(.caption.bold())
-                                .foregroundStyle(.white)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background {
-                            categoryGradient(for: category)
-                        }
-                        .clipShape(.rect(cornerRadius: 12))
+                        Color(red: 0.15, green: 0.13, blue: 0.12)
+                            .frame(height: 90)
+                            .overlay {
+                                AsyncImage(url: URL(string: category.imageURL)) { phase in
+                                    if let image = phase.image {
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                                    }
+                                }
+                                .allowsHitTesting(false)
+                            }
+                            .overlay {
+                                Color.black.opacity(0.35).allowsHitTesting(false)
+                            }
+                            .clipShape(.rect(cornerRadius: 12))
+                            .overlay {
+                                VStack(spacing: 6) {
+                                    Image(systemName: category.icon)
+                                        .font(.title3)
+                                        .foregroundStyle(.white)
+                                    Text(category.rawValue)
+                                        .font(.caption.bold())
+                                        .foregroundStyle(.white)
+                                }
+                            }
                     }
                     .buttonStyle(.plain)
                 }
@@ -224,18 +250,28 @@ struct PlansView: View {
 
     private func planRow(plan: ReadingPlan) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(red: 0.18, green: 0.16, blue: 0.15))
-                    .frame(width: 80, height: 80)
-                    .overlay {
-                        categoryGradient(for: plan.category)
-                            .clipShape(.rect(cornerRadius: 12))
+            Color(red: 0.18, green: 0.16, blue: 0.15)
+                .frame(width: 80, height: 80)
+                .overlay {
+                    AsyncImage(url: URL(string: plan.imageURL ?? plan.category.imageURL)) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                        }
                     }
-                Image(systemName: plan.category.icon)
-                    .font(.title2)
-                    .foregroundStyle(.white.opacity(0.9))
-            }
+                    .allowsHitTesting(false)
+                }
+                .overlay {
+                    Color.black.opacity(0.2).allowsHitTesting(false)
+                }
+                .overlay {
+                    Image(systemName: plan.category.icon)
+                        .font(.title2)
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+                .clipShape(.rect(cornerRadius: 12))
 
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(plan.totalDays) Dias")
@@ -295,18 +331,28 @@ struct PlansView: View {
 
     private func activePlanRow(plan: ReadingPlan, progress: ActivePlanProgress) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(red: 0.18, green: 0.16, blue: 0.15))
-                    .frame(width: 80, height: 80)
-                    .overlay {
-                        categoryGradient(for: plan.category)
-                            .clipShape(.rect(cornerRadius: 12))
+            Color(red: 0.18, green: 0.16, blue: 0.15)
+                .frame(width: 80, height: 80)
+                .overlay {
+                    AsyncImage(url: URL(string: plan.imageURL ?? plan.category.imageURL)) { phase in
+                        if let image = phase.image {
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .transition(.opacity.animation(.easeOut(duration: 0.3)))
+                        }
                     }
-                Image(systemName: plan.category.icon)
-                    .font(.title2)
-                    .foregroundStyle(.white.opacity(0.9))
-            }
+                    .allowsHitTesting(false)
+                }
+                .overlay {
+                    Color.black.opacity(0.2).allowsHitTesting(false)
+                }
+                .overlay {
+                    Image(systemName: plan.category.icon)
+                        .font(.title2)
+                        .foregroundStyle(.white.opacity(0.9))
+                }
+                .clipShape(.rect(cornerRadius: 12))
 
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 6) {

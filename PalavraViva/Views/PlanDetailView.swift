@@ -84,27 +84,42 @@ struct PlanDetailView: View {
 
     private var heroImage: some View {
         Color(red: 0.15, green: 0.13, blue: 0.12)
-            .frame(height: 220)
+            .frame(height: 240)
             .overlay {
-                ZStack {
-                    categoryGradient
-                    
-                    VStack(spacing: 12) {
-                        Image(systemName: plan.category.icon)
-                            .font(.system(size: 44))
-                            .foregroundStyle(.white.opacity(0.3))
-
-                        Text(plan.description)
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
-                            .multilineTextAlignment(.center)
-                            .lineLimit(3)
-                            .padding(.horizontal, 32)
+                AsyncImage(url: URL(string: plan.imageURL ?? plan.category.imageURL)) { phase in
+                    if let image = phase.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .transition(.opacity.animation(.easeOut(duration: 0.4)))
                     }
                 }
                 .allowsHitTesting(false)
             }
+            .overlay {
+                LinearGradient(
+                    colors: [.black.opacity(0.1), .black.opacity(0.6)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .allowsHitTesting(false)
+            }
             .clipShape(.rect(cornerRadius: 16))
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 8) {
+                    Image(systemName: plan.category.icon)
+                        .font(.system(size: 32))
+                        .foregroundStyle(.white.opacity(0.7))
+
+                    Text(plan.description)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .padding(.horizontal, 32)
+                }
+                .padding(.bottom, 20)
+            }
             .padding(.horizontal, 16)
     }
 
