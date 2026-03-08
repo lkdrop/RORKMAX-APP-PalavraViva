@@ -40,7 +40,7 @@ final class AudioService {
     private func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, options: [.duckOthers, .mixWithOthers])
+            try session.setCategory(.playback, mode: .default, options: [.duckOthers])
             try session.setActive(true, options: [])
         } catch {
             print("AudioSession config error: \(error)")
