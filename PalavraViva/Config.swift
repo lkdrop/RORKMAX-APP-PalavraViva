@@ -1,5 +1,5 @@
 import Foundation
 
-enum Config {
+nonisolated enum Config: Sendable {
     static let EXPO_PUBLIC_TOOLKIT_URL = ""
 }

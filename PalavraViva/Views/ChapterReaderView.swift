@@ -305,7 +305,7 @@ struct ChapterReaderView: View {
     }
 }
 
-struct VerseSection: Identifiable {
+nonisolated struct VerseSection: Identifiable, Sendable {
     let id: String
     let heading: String?
     let subheading: String?

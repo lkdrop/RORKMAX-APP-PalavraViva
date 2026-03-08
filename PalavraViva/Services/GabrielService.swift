@@ -1,6 +1,5 @@
 import Foundation
 
-@Observable
 final class GabrielService {
     private let systemPrompt = """
     Você é o Gabriel. Não um chatbot. Não um assistente. Você é um amigo de verdade — \
