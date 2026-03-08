@@ -19,19 +19,21 @@ final class AudioService {
         guard !isSetup else { return }
         isSetup = true
         let synth = AVSpeechSynthesizer()
-        let del = SpeechDelegate()
-        del.onFinishCallback = { [weak self] in
-            guard let self else { return }
-            self.isSpeaking = false
-            self.isPaused = false
-            self.progress = 0
-            self.currentText = ""
-            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-        }
-        del.onProgressCallback = { [weak self] range in
-            guard let self, self.totalLength > 0 else { return }
-            self.spokenLength = range.location + range.length
-            self.progress = Double(self.spokenLength) / Double(self.totalLength)
+        let del = SpeechDelegate { [weak self] in
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.isSpeaking = false
+                self.isPaused = false
+                self.progress = 0
+                self.currentText = ""
+                try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            }
+        } onProgress: { [weak self] range in
+            Task { @MainActor [weak self] in
+                guard let self, self.totalLength > 0 else { return }
+                self.spokenLength = range.location + range.length
+                self.progress = Double(self.spokenLength) / Double(self.totalLength)
+            }
         }
         synth.delegate = del
         delegate = del
@@ -112,21 +114,23 @@ final class AudioService {
 }
 
 nonisolated private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
-    var onFinishCallback: (@Sendable @MainActor () -> Void)?
-    var onProgressCallback: (@Sendable @MainActor (NSRange) -> Void)?
+    private let onFinish: @Sendable () -> Void
+    private let onProgress: @Sendable (NSRange) -> Void
+
+    init(onFinish: @escaping @Sendable () -> Void, onProgress: @escaping @Sendable (NSRange) -> Void) {
+        self.onFinish = onFinish
+        self.onProgress = onProgress
+    }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        let cb = onFinishCallback
-        Task { @MainActor in cb?() }
+        onFinish()
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        let cb = onFinishCallback
-        Task { @MainActor in cb?() }
+        onFinish()
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        let cb = onProgressCallback
-        Task { @MainActor in cb?(characterRange) }
+        onProgress(characterRange)
     }
 }

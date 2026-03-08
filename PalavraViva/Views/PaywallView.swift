@@ -8,7 +8,7 @@ struct PaywallView: View {
 
     private let accentRed = Color(red: 0.95, green: 0.3, blue: 0.35)
 
-    nonisolated enum PlanType: String, CaseIterable {
+    enum PlanType: String, CaseIterable, Sendable {
         case monthly
         case annual
     }
