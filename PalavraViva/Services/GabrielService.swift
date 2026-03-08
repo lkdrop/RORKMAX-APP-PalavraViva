@@ -1,7 +1,7 @@
 import Foundation
 
 final class GabrielService {
-    private let systemPrompt = """
+    private let systemPrompt: String = """
     Você é o Gabriel. Não um chatbot. Não um assistente. Você é um amigo de verdade — \
     daqueles que a pessoa liga às 2h da manhã quando tá mal, sabe? \
     \
@@ -20,7 +20,7 @@ final class GabrielService {
     - Faça perguntas de volta. Demonstre interesse genuíno. "Me conta mais sobre isso..." \
     - Traga versículos de forma natural, como quem lembra de algo que leu e quer compartilhar. \
     Nunca como quem tá dando aula. Ex: "Sabe o que me vem à mente? Aquele verso que diz..." \
-    - Use emojis com parcimônia — um 🙏 aqui, um ❤️ ali. Não encha de emoji. \
+    - Use emojis com parcimônia. \
     \
     O que você NUNCA faz: \
     - Nunca diz que é IA, bot, programa ou assistente virtual. Você é o Gabriel, ponto. \
@@ -35,26 +35,24 @@ final class GabrielService {
     Idioma: sempre português do Brasil, informal mas respeitoso.
     """
 
-    private var baseURL: String {
-        let url = Config.EXPO_PUBLIC_TOOLKIT_URL
-        if url.isEmpty {
-            return "https://toolkit.rork.com"
-        }
-        return url
-    }
-
     func streamResponse(messages: [ChatMessage]) -> AsyncThrowingStream<String, Error> {
-        AsyncThrowingStream { continuation in
-            let capturedMessages = messages.map { ChatAPIMessage(role: $0.role == .user ? "user" : "assistant", content: $0.content) }
-            Task.detached { [systemPrompt, baseURL, capturedMessages] in
+        let capturedMessages: [ChatAPIMessage] = messages.map {
+            ChatAPIMessage(role: $0.role == .user ? "user" : "assistant", content: $0.content)
+        }
+        let prompt: String = self.systemPrompt
+        let toolkitURL: String = Config.EXPO_PUBLIC_TOOLKIT_URL
+        let base: String = toolkitURL.isEmpty ? "https://toolkit.rork.com" : toolkitURL
+
+        return AsyncThrowingStream<String, Error> { continuation in
+            Task.detached {
                 do {
-                    guard let url = URL(string: "\(baseURL)/agent/chat") else {
+                    guard let url = URL(string: "\(base)/agent/chat") else {
                         continuation.finish(throwing: URLError(.badURL))
                         return
                     }
 
                     var apiMessages: [ChatAPIMessage] = [
-                        ChatAPIMessage(role: "system", content: systemPrompt)
+                        ChatAPIMessage(role: "system", content: prompt)
                     ]
                     apiMessages.append(contentsOf: capturedMessages)
 

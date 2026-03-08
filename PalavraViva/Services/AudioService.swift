@@ -21,10 +21,11 @@ final class AudioService {
         let synth = AVSpeechSynthesizer()
         let del = SpeechDelegate()
         del.onFinishCallback = { [weak self] in
-            self?.isSpeaking = false
-            self?.isPaused = false
-            self?.progress = 0
-            self?.currentText = ""
+            guard let self else { return }
+            self.isSpeaking = false
+            self.isPaused = false
+            self.progress = 0
+            self.currentText = ""
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         }
         del.onProgressCallback = { [weak self] range in
@@ -111,20 +112,20 @@ final class AudioService {
 }
 
 nonisolated private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
-    var onFinishCallback: (@MainActor () -> Void)?
-    var onProgressCallback: (@MainActor (NSRange) -> Void)?
+    var onFinishCallback: (@Sendable @MainActor () -> Void)?
+    var onProgressCallback: (@Sendable @MainActor (NSRange) -> Void)?
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         let cb = onFinishCallback
         Task { @MainActor in cb?() }
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
         let cb = onFinishCallback
         Task { @MainActor in cb?() }
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
         let cb = onProgressCallback
         Task { @MainActor in cb?(characterRange) }
     }
