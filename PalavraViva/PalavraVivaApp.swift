@@ -17,3 +17,4 @@ struct PalavraVivaApp: App {
         }
     }
 }
+
