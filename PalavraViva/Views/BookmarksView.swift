@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct BookmarksView: View {
     @Bindable var viewModel: BibleViewModel

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ChapterReaderView: View {
     @Bindable var viewModel: BibleViewModel
