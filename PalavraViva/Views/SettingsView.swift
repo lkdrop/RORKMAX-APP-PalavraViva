@@ -4,68 +4,33 @@ struct SettingsView: View {
     @Bindable var viewModel: BibleViewModel
     @AppStorage("selectedAppearance") private var selectedAppearance: String = "system"
     @State private var subscriptionManager = SubscriptionManager.shared
-    @State private var showPaywall: Bool = false
 
     private let accentRed = Color(red: 0.95, green: 0.3, blue: 0.35)
 
     var body: some View {
         Form {
-            if !subscriptionManager.isPremium {
-                Section {
-                    Button {
-                        showPaywall = true
-                    } label: {
-                        HStack(spacing: 14) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(accentRed)
-                                    .frame(width: 40, height: 40)
-                                Image(systemName: "crown.fill")
-                                    .font(.body)
-                                    .foregroundStyle(.white)
-                            }
-
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text("Palavra Viva PRO")
-                                    .font(.subheadline.bold())
-                                    .foregroundStyle(.white)
-                                Text("Desbloqueie todos os recursos")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption.bold())
-                                .foregroundStyle(.tertiary)
-                        }
+            Section {
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(accentRed)
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "crown.fill")
+                            .font(.body)
+                            .foregroundStyle(.white)
                     }
-                }
-            } else {
-                Section {
-                    HStack(spacing: 14) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(accentRed)
-                                .frame(width: 40, height: 40)
-                            Image(systemName: "crown.fill")
-                                .font(.body)
-                                .foregroundStyle(.white)
-                        }
 
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text("Palavra Viva PRO")
-                                .font(.subheadline.bold())
-                                .foregroundStyle(.white)
-                            HStack(spacing: 4) {
-                                Image(systemName: "checkmark.seal.fill")
-                                    .font(.caption2)
-                                    .foregroundStyle(.green)
-                                Text("Ativo")
-                                    .font(.caption)
-                                    .foregroundStyle(.green)
-                            }
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Palavra Viva")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.white)
+                        HStack(spacing: 4) {
+                            Image(systemName: "checkmark.seal.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.green)
+                            Text("Gratuito")
+                                .font(.caption)
+                                .foregroundStyle(.green)
                         }
                     }
                 }
@@ -132,12 +97,7 @@ struct SettingsView: View {
         .background(Color(red: 0.07, green: 0.07, blue: 0.08))
         .navigationTitle("Ajustes")
         .tint(accentRed)
-        .onChange(of: showPaywall) { _, newValue in
-            if newValue {
-                subscriptionManager.showPaywall = true
-                showPaywall = false
-            }
-        }
+
     }
 
     private func statsRow(icon: String, color: Color, title: String, value: String) -> some View {

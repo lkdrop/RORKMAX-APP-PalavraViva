@@ -3,7 +3,6 @@ import SwiftUI
 struct ContentView: View {
     @State private var viewModel = BibleViewModel()
     @State private var selectedTab: Int = 0
-    @State private var subscriptionManager = SubscriptionManager.shared
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -38,8 +37,6 @@ struct ContentView: View {
             }
         }
         .tint(Color(red: 0.95, green: 0.3, blue: 0.35))
-        .sheet(isPresented: $subscriptionManager.showPaywall) {
-            PaywallView()
-        }
+
     }
 }

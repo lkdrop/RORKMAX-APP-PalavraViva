@@ -220,11 +220,7 @@ struct HomeView: View {
 
     private var guidedPrayerCard: some View {
         Button {
-            if subscriptionManager.isPremium {
-                showGabriel = true
-            } else {
-                subscriptionManager.showPaywall = true
-            }
+            showGabriel = true
         } label: {
             HStack(spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -299,11 +295,7 @@ struct HomeView: View {
                 Spacer()
                 
                 Button {
-                    if subscriptionManager.isPremium {
-                        audioService.speak(daily.verse.text)
-                    } else {
-                        subscriptionManager.showPaywall = true
-                    }
+                    audioService.speak(daily.verse.text)
                 } label: {
                     Image(systemName: audioService.isSpeakingText(daily.verse.text) ? "pause.fill" : "speaker.wave.2")
                         .font(.caption)
@@ -466,43 +458,8 @@ struct HomeView: View {
     }
 
     private var devotionalCard: some View {
-        Group {
-            if subscriptionManager.isPremium {
-                DevotionalCardView(devotional: DevotionalProvider.todaysDevotional())
-                    .padding(.horizontal, 16)
-            } else {
-                Button {
-                    subscriptionManager.showPaywall = true
-                } label: {
-                    HStack(spacing: 16) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Devocional do Dia")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(DevotionalProvider.todaysDevotional().title)
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                            HStack(spacing: 6) {
-                                Image(systemName: "crown.fill")
-                                    .font(.caption2)
-                                    .foregroundStyle(Color(red: 0.95, green: 0.3, blue: 0.35))
-                                Text("Premium")
-                                    .font(.caption)
-                                    .foregroundStyle(Color(red: 0.95, green: 0.3, blue: 0.35))
-                            }
-                        }
-                        Spacer()
-                        Image(systemName: "lock.fill")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(16)
-                    .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
-                }
-                .buttonStyle(.plain)
-                .padding(.horizontal, 16)
-            }
-        }
+        DevotionalCardView(devotional: DevotionalProvider.todaysDevotional())
+            .padding(.horizontal, 16)
     }
 
     private var continueReadingCard: some View {
