@@ -40,8 +40,8 @@ final class AudioService {
     private func configureAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, options: [.duckOthers])
-            try session.setActive(true)
+            try session.setCategory(.playback, mode: .default, options: [.duckOthers, .mixWithOthers])
+            try session.setActive(true, options: [])
         } catch {
             print("AudioSession config error: \(error)")
         }
@@ -74,14 +74,29 @@ final class AudioService {
         progress = 0
 
         let utterance = AVSpeechUtterance(string: text)
-        utterance.voice = AVSpeechSynthesisVoice(language: "pt-BR")
+        utterance.voice = Self.findBestVoice()
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate * 0.9
         utterance.pitchMultiplier = 1.05
         utterance.volume = 1.0
+        utterance.prefersAssistiveTechnologySettings = false
 
         isSpeaking = true
         isPaused = false
         synthesizer.speak(utterance)
+    }
+
+    private static func findBestVoice() -> AVSpeechSynthesisVoice? {
+        if let voice = AVSpeechSynthesisVoice(language: "pt-BR") {
+            return voice
+        }
+        if let voice = AVSpeechSynthesisVoice(language: "pt") {
+            return voice
+        }
+        let allVoices = AVSpeechSynthesisVoice.speechVoices()
+        if let ptVoice = allVoices.first(where: { $0.language.hasPrefix("pt") }) {
+            return ptVoice
+        }
+        return AVSpeechSynthesisVoice(language: "en-US")
     }
 
     func stop() {
