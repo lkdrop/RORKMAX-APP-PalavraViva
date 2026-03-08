@@ -228,7 +228,7 @@ struct PlanDetailView: View {
                 HStack(spacing: 0) {
                     Text(task.title)
                         .font(.body)
-                        .foregroundStyle(isCompleted ? Color.secondary : Color.white)
+                        .foregroundStyle(isCompleted ? .secondary : .white)
                         .strikethrough(isCompleted, color: .secondary)
 
                     Spacer()
