@@ -98,18 +98,10 @@ struct ChapterReaderView: View {
                                         isPlaying: audioService.isSpeakingText(verse.text),
                                         isPaused: audioService.isPaused && audioService.isSpeakingText(verse.text),
                                         onToggleBookmark: {
-                                            if subscriptionManager.isPremium {
-                                                viewModel.toggleBookmark(verse: verse, bookName: book.name)
-                                            } else {
-                                                subscriptionManager.showPaywall = true
-                                            }
+                                            viewModel.toggleBookmark(verse: verse, bookName: book.name)
                                         },
                                         onSpeak: {
-                                            if subscriptionManager.isPremium {
-                                                audioService.speak(verse.text)
-                                            } else {
-                                                subscriptionManager.showPaywall = true
-                                            }
+                                            audioService.speak(verse.text)
                                         }
                                     )
                                 }
@@ -160,13 +152,9 @@ struct ChapterReaderView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 16) {
                     Button {
-                        if subscriptionManager.isPremium {
-                            if let chapter = viewModel.currentChapter {
-                                let allText = chapter.verses.map { $0.text }.joined(separator: " ")
-                                audioService.speak(allText)
-                            }
-                        } else {
-                            subscriptionManager.showPaywall = true
+                        if let chapter = viewModel.currentChapter {
+                            let allText = chapter.verses.map { $0.text }.joined(separator: " ")
+                            audioService.speak(allText)
                         }
                     } label: {
                         Image(systemName: audioService.isSpeaking ? "pause.fill" : "speaker.wave.2")
@@ -275,13 +263,9 @@ struct ChapterReaderView: View {
             Spacer()
 
             Button {
-                if subscriptionManager.isPremium {
-                    if let chapter = viewModel.currentChapter {
-                        let allText = chapter.verses.map { $0.text }.joined(separator: " ")
-                        audioService.speak(allText)
-                    }
-                } else {
-                    subscriptionManager.showPaywall = true
+                if let chapter = viewModel.currentChapter {
+                    let allText = chapter.verses.map { $0.text }.joined(separator: " ")
+                    audioService.speak(allText)
                 }
             } label: {
                 ZStack {
