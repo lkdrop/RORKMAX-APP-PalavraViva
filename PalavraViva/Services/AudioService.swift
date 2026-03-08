@@ -19,6 +19,7 @@ final class AudioService {
                 self?.isPaused = false
                 self?.progress = 0
                 self?.currentText = ""
+                try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
             },
             onProgress: { [weak self] range in
                 guard let self, self.totalLength > 0 else { return }
@@ -27,6 +28,16 @@ final class AudioService {
             }
         )
         synthesizer.delegate = delegate
+    }
+
+    private func configureAudioSession() {
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.playback, mode: .spokenContent, options: [.duckOthers])
+            try session.setActive(true)
+        } catch {
+            print("AudioSession config error: \(error)")
+        }
     }
 
     func speak(_ text: String) {
@@ -44,6 +55,8 @@ final class AudioService {
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
+
+        configureAudioSession()
 
         currentText = text
         totalLength = text.count
