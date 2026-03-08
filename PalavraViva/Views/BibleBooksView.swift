@@ -35,7 +35,7 @@ struct BibleBooksView: View {
                     VStack(spacing: 8) {
                         Text(testament == .oldTestament ? "Antigo Testamento" : "Novo Testamento")
                             .font(.subheadline.bold())
-                            .foregroundStyle(selectedTestament == testament ? .white : .secondary)
+                            .foregroundStyle(selectedTestament == testament ? Color.white : Color.secondary)
                         Rectangle()
                             .fill(selectedTestament == testament ? accentRed : .clear)
                             .frame(height: 2)

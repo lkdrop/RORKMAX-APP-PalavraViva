@@ -283,7 +283,7 @@ struct ProfileView: View {
                                 Text(filter)
                                     .font(.subheadline.weight(.medium))
                             }
-                            .foregroundStyle(selectedActivityFilter == index ? .black : .white)
+                            .foregroundStyle(selectedActivityFilter == index ? Color.black : Color.white)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background {

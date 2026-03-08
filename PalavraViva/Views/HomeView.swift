@@ -64,7 +64,7 @@ struct HomeView: View {
                         VStack(spacing: 6) {
                             Text("Hoje")
                                 .font(.title2.bold())
-                                .foregroundStyle(selectedHomeTab == 0 ? .white : .secondary)
+                                .foregroundStyle(selectedHomeTab == 0 ? Color.white : Color.secondary)
                             Rectangle()
                                 .fill(selectedHomeTab == 0 ? Color(red: 0.95, green: 0.3, blue: 0.35) : .clear)
                                 .frame(height: 2)
@@ -77,7 +77,7 @@ struct HomeView: View {
                         VStack(spacing: 6) {
                             Text("Comunidade")
                                 .font(.title2.bold())
-                                .foregroundStyle(selectedHomeTab == 1 ? .white : .secondary)
+                                .foregroundStyle(selectedHomeTab == 1 ? Color.white : Color.secondary)
                             Rectangle()
                                 .fill(selectedHomeTab == 1 ? Color(red: 0.95, green: 0.3, blue: 0.35) : .clear)
                                 .frame(height: 2)
@@ -339,7 +339,7 @@ struct HomeView: View {
                     } label: {
                         Image(systemName: audioService.isSpeakingText(daily.verse.text) ? "pause.fill" : "speaker.wave.2")
                             .font(.caption)
-                            .foregroundStyle(audioService.isSpeakingText(daily.verse.text) ? Color(red: 0.95, green: 0.3, blue: 0.35) : .white.opacity(0.6))
+                            .foregroundStyle(audioService.isSpeakingText(daily.verse.text) ? Color(red: 0.95, green: 0.3, blue: 0.35) : Color.white.opacity(0.6))
                     }
                 }
                 .padding(.top, 4)
@@ -380,7 +380,7 @@ struct HomeView: View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.subheadline)
-                .foregroundStyle(highlighted ? Color(red: 0.95, green: 0.3, blue: 0.35) : .white.opacity(0.6))
+                .foregroundStyle(highlighted ? Color(red: 0.95, green: 0.3, blue: 0.35) : Color.white.opacity(0.6))
             Text(count)
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.5))

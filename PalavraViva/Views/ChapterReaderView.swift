@@ -256,7 +256,7 @@ struct ChapterReaderView: View {
                         .frame(width: 44, height: 44)
                     Image(systemName: "chevron.left")
                         .font(.body.bold())
-                        .foregroundStyle(viewModel.canGoToPreviousChapter ? .white : .secondary)
+                        .foregroundStyle(viewModel.canGoToPreviousChapter ? Color.white : Color.secondary)
                 }
             }
             .disabled(!viewModel.canGoToPreviousChapter)
@@ -290,7 +290,7 @@ struct ChapterReaderView: View {
                         .frame(width: 44, height: 44)
                     Image(systemName: "chevron.right")
                         .font(.body.bold())
-                        .foregroundStyle(viewModel.canGoToNextChapter ? .white : .secondary)
+                        .foregroundStyle(viewModel.canGoToNextChapter ? Color.white : Color.secondary)
                 }
             }
             .disabled(!viewModel.canGoToNextChapter)

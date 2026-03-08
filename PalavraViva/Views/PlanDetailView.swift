@@ -145,13 +145,13 @@ struct PlanDetailView: View {
                                 if !isCompleted {
                                     Text("\(day.dayNumber)")
                                         .font(.headline.bold())
-                                        .foregroundStyle(isSelected ? .white : .secondary)
+                                        .foregroundStyle(isSelected ? Color.white : Color.secondary)
                                 }
                             }
 
                             Text(dayDate.formatted(.dateTime.day().month(.abbreviated)))
                                 .font(.caption2)
-                                .foregroundStyle(isSelected ? .white.opacity(0.7) : .secondary)
+                                .foregroundStyle(isSelected ? Color.white.opacity(0.7) : Color.secondary)
                         }
                         .frame(width: 64, height: 64)
                         .background {
@@ -183,7 +183,7 @@ struct PlanDetailView: View {
                     let allDone = currentDayData.map { planProgress.allDayTasksCompleted(planId: plan.id, tasks: $0.tasks) } ?? false
                     Text(allDone ? "Concluído!" : "Em dia!")
                         .font(.caption.bold())
-                        .foregroundStyle(allDone ? .green : .white)
+                        .foregroundStyle(allDone ? Color.green : Color.white)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(
@@ -228,7 +228,7 @@ struct PlanDetailView: View {
                 HStack(spacing: 0) {
                     Text(task.title)
                         .font(.body)
-                        .foregroundStyle(isCompleted ? .secondary : .white)
+                        .foregroundStyle(isCompleted ? Color.secondary : Color.white)
                         .strikethrough(isCompleted, color: .secondary)
 
                     Spacer()

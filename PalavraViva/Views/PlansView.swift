@@ -53,7 +53,7 @@ struct PlansView: View {
                     } label: {
                         Text(filter)
                             .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(selectedFilter == index ? .white : .secondary)
+                            .foregroundStyle(selectedFilter == index ? Color.white : Color.secondary)
                             .padding(.horizontal, 16)
                             .padding(.vertical, 10)
                             .background {
