@@ -2,46 +2,18 @@ import SwiftUI
 
 struct PlansView: View {
     @State private var selectedFilter: Int = 1
-    @State private var subscriptionManager = SubscriptionManager.shared
-    @State private var featuredIndex: Int = 0
+    @State private var planProgress = PlanProgressManager.shared
+    @State private var searchText: String = ""
 
-    private let filters = ["Meus Planos", "Encontrar Planos", "Salvo", "Concluídos"]
+    private let filters = ["Meus Planos", "Explorar", "Salvos", "Concluídos"]
     private let accentRed = Color(red: 0.95, green: 0.3, blue: 0.35)
 
-    private let categories: [(name: String, color: Color)] = [
-        ("AMOR", Color(red: 0.9, green: 0.3, blue: 0.35)),
-        ("CURA", Color(red: 0.95, green: 0.25, blue: 0.25)),
-        ("ESPERANÇA", Color(red: 0.3, green: 0.7, blue: 0.5)),
-        ("ANSIEDADE", Color(red: 0.85, green: 0.5, blue: 0.2)),
-        ("RAIVA", Color(red: 0.6, green: 0.2, blue: 0.2)),
-        ("DEPRESSÃO", Color(red: 0.4, green: 0.35, blue: 0.6)),
-    ]
+    private let featuredPlans: [ReadingPlan] = {
+        let all = PlanCategory.allCases.flatMap { ReadingPlanProvider.plans(for: $0) }
+        return Array(all.filter { $0.rating >= 4.9 }.prefix(5))
+    }()
 
-    private let topicTags = ["Novo", "Relacionamentos", "Ouça e Assista", "Família", "Juventude"]
-
-    private let featuredPlans: [PlanItem] = [
-        PlanItem(title: "Ainda Não É o Fim – 30 Dias para Redescobrir o Autor da Sua História", days: 30, icon: "book.pages"),
-        PlanItem(title: "Bíblia em Um Ano", days: 365, icon: "calendar"),
-        PlanItem(title: "Renovando Sua Mente", days: 21, icon: "brain.head.profile"),
-    ]
-
-    private let sectionPlans: [(section: String, plans: [PlanItem])] = [
-        ("Quaresma & Páscoa", [
-            PlanItem(title: "Seguindo os Últimos Passos de Jesus", days: 10, icon: "figure.walk"),
-            PlanItem(title: "Das Feridas Abertas Às Cicatrizes De Esperança", days: 4, icon: "heart.circle"),
-            PlanItem(title: "A Cruz e o Amor De Deus", days: 4, icon: "cross"),
-        ]),
-        ("João", [
-            PlanItem(title: "Jesus: A Verdadeira Luz do Mundo", days: 7, icon: "sun.max.fill"),
-            PlanItem(title: "João", days: 10, icon: "person.fill"),
-            PlanItem(title: "O Maior Amor Que Existe", days: 4, icon: "heart.fill"),
-        ]),
-        ("Novo na Fé", [
-            PlanItem(title: "Primeiros Passos com Deus", days: 15, icon: "figure.walk"),
-            PlanItem(title: "Entendendo a Bíblia", days: 7, icon: "book.fill"),
-            PlanItem(title: "Oração para Iniciantes", days: 5, icon: "hands.sparkles"),
-        ]),
-    ]
+    private let topicTags = ["Novo", "Relacionamentos", "Louvor", "Família", "Juventude", "Mulheres", "Homens"]
 
     var body: some View {
         NavigationStack {
@@ -50,18 +22,25 @@ struct PlansView: View {
 
                 ScrollView {
                     VStack(spacing: 24) {
-                        if selectedFilter == 1 {
-                            findPlansContent
-                        } else if selectedFilter == 0 {
+                        switch selectedFilter {
+                        case 0:
                             myPlansContent
-                        } else {
-                            emptyFilterContent
+                        case 1:
+                            explorePlansContent
+                        default:
+                            emptyStateContent
                         }
                     }
                     .padding(.bottom, 32)
                 }
             }
             .background(Color(red: 0.07, green: 0.07, blue: 0.08))
+            .navigationDestination(for: PlanCategory.self) { category in
+                PlanCategoryView(category: category)
+            }
+            .navigationDestination(for: ReadingPlan.self) { plan in
+                PlanDetailView(plan: plan)
+            }
         }
     }
 
@@ -95,92 +74,116 @@ struct PlansView: View {
         .padding(.vertical, 12)
     }
 
-    private var findPlansContent: some View {
-        VStack(spacing: 24) {
-            featuredCarousel
+    private var explorePlansContent: some View {
+        VStack(spacing: 28) {
+            featuredSection
 
-            categoryChips
+            categoryGrid
 
             topicTagsSection
 
-            ForEach(sectionPlans, id: \.section) { section in
-                planSection(title: section.section, plans: section.plans)
-            }
+            popularSection
         }
     }
 
-    private var featuredCarousel: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 14) {
-                ForEach(Array(featuredPlans.enumerated()), id: \.offset) { index, plan in
-                    Button {} label: {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ZStack(alignment: .bottomLeading) {
-                                Color(red: 0.18, green: 0.16, blue: 0.14)
-                                    .frame(height: 200)
-                                    .overlay {
-                                        ZStack {
-                                            featuredGradient(for: index)
-                                            VStack {
-                                                Spacer()
-                                                HStack {
-                                                    Spacer()
-                                                    Image(systemName: plan.icon)
-                                                        .font(.system(size: 60))
-                                                        .foregroundStyle(.white.opacity(0.1))
-                                                        .padding(20)
-                                                }
-                                            }
-                                        }
-                                        .allowsHitTesting(false)
-                                    }
-                                    .clipShape(.rect(cornerRadius: 14))
-                            }
+    private var featuredSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Destaques")
+                .font(.title3.bold())
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
 
-                            Text(plan.title)
-                                .font(.subheadline.bold())
-                                .foregroundStyle(.white)
-                                .lineLimit(2)
-                                .padding(.top, 10)
-                                .padding(.horizontal, 4)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 14) {
+                    ForEach(featuredPlans) { plan in
+                        NavigationLink(value: plan) {
+                            featuredCard(plan: plan)
                         }
-                        .frame(width: 280)
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+            .contentMargins(.horizontal, 16)
+        }
+    }
+
+    private func featuredCard(plan: ReadingPlan) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .bottomLeading) {
+                Color(red: 0.18, green: 0.16, blue: 0.14)
+                    .frame(height: 180)
+                    .overlay {
+                        categoryGradient(for: plan.category)
+                            .allowsHitTesting(false)
+                    }
+                    .overlay(alignment: .bottomTrailing) {
+                        Image(systemName: plan.category.icon)
+                            .font(.system(size: 50))
+                            .foregroundStyle(.white.opacity(0.12))
+                            .padding(16)
+                    }
+                    .overlay(alignment: .topLeading) {
+                        Text("\(plan.totalDays) Dias")
+                            .font(.caption2.bold())
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(.ultraThinMaterial, in: Capsule())
+                            .padding(12)
+                    }
+                    .clipShape(.rect(cornerRadius: 14))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(plan.title)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+
+                HStack(spacing: 2) {
+                    ForEach(0..<5, id: \.self) { i in
+                        Image(systemName: Double(i) < plan.rating ? "star.fill" : "star")
+                            .font(.system(size: 9))
+                            .foregroundStyle(accentRed)
+                    }
+                }
+            }
+            .padding(.top, 10)
+            .padding(.horizontal, 2)
+        }
+        .frame(width: 260)
+    }
+
+    private var categoryGrid: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Categorias")
+                .font(.title3.bold())
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
+                ForEach(PlanCategory.allCases, id: \.rawValue) { category in
+                    NavigationLink(value: category) {
+                        VStack(spacing: 8) {
+                            Image(systemName: category.icon)
+                                .font(.title3)
+                                .foregroundStyle(.white)
+                            Text(category.rawValue)
+                                .font(.caption.bold())
+                                .foregroundStyle(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background {
+                            categoryGradient(for: category)
+                        }
+                        .clipShape(.rect(cornerRadius: 12))
                     }
                     .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, 16)
         }
-        .contentMargins(.horizontal, 16)
-    }
-
-    private func featuredGradient(for index: Int) -> some View {
-        let colors: [(Color, Color)] = [
-            (Color(red: 0.85, green: 0.75, blue: 0.6), Color(red: 0.6, green: 0.5, blue: 0.35)),
-            (Color(red: 0.4, green: 0.5, blue: 0.7), Color(red: 0.25, green: 0.3, blue: 0.5)),
-            (Color(red: 0.6, green: 0.35, blue: 0.35), Color(red: 0.4, green: 0.2, blue: 0.2)),
-        ]
-        let pair = colors[index % colors.count]
-        return LinearGradient(
-            colors: [pair.0, pair.1],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
-
-    private var categoryChips: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
-            ForEach(categories, id: \.name) { category in
-                Button {} label: {
-                    Text(category.name)
-                        .font(.caption.bold())
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(category.color, in: RoundedRectangle(cornerRadius: 12))
-                }
-            }
-        }
-        .padding(.horizontal, 16)
     }
 
     private var topicTagsSection: some View {
@@ -201,53 +204,51 @@ struct PlansView: View {
         .contentMargins(.horizontal, 16)
     }
 
-    private func planSection(title: String, plans: [PlanItem]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(title)
-                    .font(.title3.bold())
-                    .foregroundStyle(.white)
-                Spacer()
-                Button {} label: {
-                    HStack(spacing: 4) {
-                        Text("Ver Todos")
-                            .font(.subheadline)
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal, 16)
+    private var popularSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Populares")
+                .font(.title3.bold())
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
 
-            ForEach(plans, id: \.title) { plan in
-                planRow(plan: plan)
+            let popular = PlanCategory.allCases.flatMap { ReadingPlanProvider.plans(for: $0) }.filter { $0.rating >= 4.9 }.prefix(8)
+
+            ForEach(Array(popular)) { plan in
+                NavigationLink(value: plan) {
+                    planRow(plan: plan)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
 
-    private func planRow(plan: PlanItem) -> some View {
+    private func planRow(plan: ReadingPlan) -> some View {
         HStack(spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: 12)
                     .fill(Color(red: 0.18, green: 0.16, blue: 0.15))
-                    .frame(width: 64, height: 64)
-                Image(systemName: plan.icon)
-                    .font(.title3)
-                    .foregroundStyle(accentRed)
+                    .frame(width: 80, height: 80)
+                    .overlay {
+                        categoryGradient(for: plan.category)
+                            .clipShape(.rect(cornerRadius: 12))
+                    }
+                Image(systemName: plan.category.icon)
+                    .font(.title2)
+                    .foregroundStyle(.white.opacity(0.9))
             }
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(plan.days) Dias")
+            VStack(alignment: .leading, spacing: 5) {
+                Text("\(plan.totalDays) Dias")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text(plan.title)
                     .font(.subheadline.bold())
                     .foregroundStyle(.white)
                     .lineLimit(2)
+                    .multilineTextAlignment(.leading)
                 HStack(spacing: 2) {
-                    ForEach(0..<5, id: \.self) { _ in
-                        Image(systemName: "star.fill")
+                    ForEach(0..<5, id: \.self) { i in
+                        Image(systemName: Double(i) < plan.rating ? "star.fill" : "star")
                             .font(.system(size: 8))
                             .foregroundStyle(accentRed)
                     }
@@ -256,21 +257,90 @@ struct PlansView: View {
 
             Spacer()
 
-            Button {} label: {
-                Text("Começar")
+            Button {
+            } label: {
+                Text("Iniciar")
                     .font(.caption.bold())
                     .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color(red: 0.2, green: 0.2, blue: 0.22), in: Capsule())
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 9)
+                    .background(Color(red: 0.22, green: 0.22, blue: 0.24), in: Capsule())
             }
         }
         .padding(.horizontal, 16)
     }
 
     private var myPlansContent: some View {
+        Group {
+            let activeIds = Array(planProgress.activePlans.keys)
+            if activeIds.isEmpty {
+                emptyMyPlans
+            } else {
+                VStack(spacing: 16) {
+                    let allPlans = PlanCategory.allCases.flatMap { ReadingPlanProvider.plans(for: $0) }
+                    ForEach(activeIds, id: \.self) { planId in
+                        if let plan = allPlans.first(where: { $0.id == planId }),
+                           let progress = planProgress.progress(for: planId) {
+                            NavigationLink(value: plan) {
+                                activePlanRow(plan: plan, progress: progress)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+        }
+    }
+
+    private func activePlanRow(plan: ReadingPlan, progress: ActivePlanProgress) -> some View {
+        HStack(spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(red: 0.18, green: 0.16, blue: 0.15))
+                    .frame(width: 80, height: 80)
+                    .overlay {
+                        categoryGradient(for: plan.category)
+                            .clipShape(.rect(cornerRadius: 12))
+                    }
+                Image(systemName: plan.category.icon)
+                    .font(.title2)
+                    .foregroundStyle(.white.opacity(0.9))
+            }
+
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.square")
+                        .font(.caption2)
+                    Text("Dia \(progress.currentDay) de \(plan.totalDays)")
+                        .font(.caption)
+                }
+                .foregroundStyle(.secondary)
+
+                Text(plan.title)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                ProgressView(value: Double(progress.currentDay - 1), total: Double(plan.totalDays))
+                    .tint(accentRed)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(Color(red: 0.12, green: 0.12, blue: 0.14), in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 16)
+    }
+
+    private var emptyMyPlans: some View {
         VStack(spacing: 20) {
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 60)
             Image(systemName: "checkmark.square")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
@@ -284,7 +354,7 @@ struct PlansView: View {
             Button {
                 withAnimation { selectedFilter = 1 }
             } label: {
-                Text("Encontrar Planos")
+                Text("Explorar Planos")
                     .font(.subheadline.bold())
                     .foregroundStyle(.white)
                     .padding(.horizontal, 24)
@@ -294,9 +364,9 @@ struct PlansView: View {
         }
     }
 
-    private var emptyFilterContent: some View {
+    private var emptyStateContent: some View {
         VStack(spacing: 20) {
-            Spacer().frame(height: 40)
+            Spacer().frame(height: 60)
             Image(systemName: "bookmark")
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
@@ -309,10 +379,32 @@ struct PlansView: View {
                 .multilineTextAlignment(.center)
         }
     }
+
+    private func categoryGradient(for category: PlanCategory) -> some View {
+        let colors: [Color] = {
+            switch category {
+            case .amor: return [Color(red: 0.91, green: 0.28, blue: 0.33), Color(red: 0.78, green: 0.16, blue: 0.22)]
+            case .cura: return [Color(red: 0.36, green: 0.66, blue: 0.55), Color(red: 0.24, green: 0.48, blue: 0.38)]
+            case .esperanca: return [Color(red: 0.96, green: 0.64, blue: 0.38), Color(red: 0.88, green: 0.48, blue: 0.23)]
+            case .ansiedade: return [Color(red: 0.48, green: 0.41, blue: 0.68), Color(red: 0.35, green: 0.29, blue: 0.54)]
+            case .raiva: return [Color(red: 0.84, green: 0.25, blue: 0.27), Color(red: 0.64, green: 0.19, blue: 0.21)]
+            case .depressao: return [Color(red: 0.42, green: 0.48, blue: 0.58), Color(red: 0.29, green: 0.33, blue: 0.41)]
+            case .fe: return [Color(red: 0.83, green: 0.63, blue: 0.35), Color(red: 0.72, green: 0.53, blue: 0.18)]
+            case .familia: return [Color(red: 0.31, green: 0.8, blue: 0.77), Color(red: 0.21, green: 0.7, blue: 0.67)]
+            case .oracao: return [Color(red: 0.61, green: 0.49, blue: 0.85), Color(red: 0.48, green: 0.37, blue: 0.72)]
+            }
+        }()
+        return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+    }
 }
 
-nonisolated struct PlanItem: Sendable {
-    let title: String
-    let days: Int
-    let icon: String
+extension ReadingPlan: Hashable {
+    nonisolated static func == (lhs: ReadingPlan, rhs: ReadingPlan) -> Bool {
+        lhs.id == rhs.id
+    }
+    nonisolated func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 }
+
+
