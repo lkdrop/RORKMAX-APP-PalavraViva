@@ -7,12 +7,18 @@ final class AudioService {
     var currentText: String = ""
     var progress: Double = 0
 
-    private let synthesizer = AVSpeechSynthesizer()
+    private var synthesizer: AVSpeechSynthesizer?
     private var delegate: SpeechDelegate?
     private var totalLength: Int = 0
     private var spokenLength: Int = 0
+    private var isSetup: Bool = false
 
-    init() {
+    init() {}
+
+    private func ensureSetup() {
+        guard !isSetup else { return }
+        isSetup = true
+        let synth = AVSpeechSynthesizer()
         delegate = SpeechDelegate(
             onFinish: { [weak self] in
                 self?.isSpeaking = false
@@ -27,7 +33,8 @@ final class AudioService {
                 self.progress = Double(self.spokenLength) / Double(self.totalLength)
             }
         )
-        synthesizer.delegate = delegate
+        synth.delegate = delegate
+        synthesizer = synth
     }
 
     private func configureAudioSession() {
@@ -41,6 +48,9 @@ final class AudioService {
     }
 
     func speak(_ text: String) {
+        ensureSetup()
+        guard let synthesizer else { return }
+
         if synthesizer.isSpeaking && currentText == text {
             if isPaused {
                 synthesizer.continueSpeaking()
@@ -75,7 +85,7 @@ final class AudioService {
     }
 
     func stop() {
-        synthesizer.stopSpeaking(at: .immediate)
+        synthesizer?.stopSpeaking(at: .immediate)
         isSpeaking = false
         isPaused = false
         progress = 0
