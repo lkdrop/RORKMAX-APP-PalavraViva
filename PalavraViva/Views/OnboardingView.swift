@@ -175,7 +175,7 @@ struct OnboardingView: View {
     }
 }
 
-nonisolated struct OnboardingPage: Sendable {
+struct OnboardingPage {
     let icon: String
     let iconColor: Color
     let title: String

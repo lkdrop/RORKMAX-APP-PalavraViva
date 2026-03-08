@@ -1,7 +1,6 @@
 import SwiftUI
 
 @main
-
 struct PalavraVivaApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 

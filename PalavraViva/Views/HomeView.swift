@@ -442,7 +442,7 @@ struct HomeView: View {
                         Color.black.opacity(0.25).allowsHitTesting(false)
                     }
                     .overlay {
-                        Image(systemName: "book.and.wrench")
+                        Image(systemName: "book.closed.fill")
                             .font(.title2)
                             .foregroundStyle(Color(red: 0.85, green: 0.65, blue: 0.35))
                     }
