@@ -6,25 +6,35 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Início", systemImage: "house.fill", value: 0) {
-                HomeView(viewModel: viewModel)
-            }
+            HomeView(viewModel: viewModel)
+                .tabItem {
+                    Label("Início", systemImage: "house.fill")
+                }
+                .tag(0)
 
-            Tab("Bíblia", systemImage: "book.fill", value: 1) {
-                BibleBooksView(viewModel: viewModel)
-            }
+            BibleBooksView(viewModel: viewModel)
+                .tabItem {
+                    Label("Bíblia", systemImage: "book.fill")
+                }
+                .tag(1)
 
-            Tab("Planos", systemImage: "checkmark.square.fill", value: 2) {
-                PlansView()
-            }
+            PlansView()
+                .tabItem {
+                    Label("Planos", systemImage: "checkmark.square.fill")
+                }
+                .tag(2)
 
-            Tab("Descubra", systemImage: "magnifyingglass", value: 3) {
-                DiscoverView(viewModel: viewModel)
-            }
+            DiscoverView(viewModel: viewModel)
+                .tabItem {
+                    Label("Descubra", systemImage: "magnifyingglass")
+                }
+                .tag(3)
 
-            Tab("Você", systemImage: "person.circle.fill", value: 4) {
-                ProfileView(viewModel: viewModel)
-            }
+            ProfileView(viewModel: viewModel)
+                .tabItem {
+                    Label("Você", systemImage: "person.circle.fill")
+                }
+                .tag(4)
         }
         .tint(Color(red: 0.95, green: 0.3, blue: 0.35))
     }

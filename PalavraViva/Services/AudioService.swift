@@ -19,21 +19,21 @@ final class AudioService {
         guard !isSetup else { return }
         isSetup = true
         let synth = AVSpeechSynthesizer()
-        delegate = SpeechDelegate(
-            onFinish: { [weak self] in
-                self?.isSpeaking = false
-                self?.isPaused = false
-                self?.progress = 0
-                self?.currentText = ""
-                try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-            },
-            onProgress: { [weak self] range in
-                guard let self, self.totalLength > 0 else { return }
-                self.spokenLength = range.location + range.length
-                self.progress = Double(self.spokenLength) / Double(self.totalLength)
-            }
-        )
-        synth.delegate = delegate
+        let del = SpeechDelegate()
+        del.onFinishCallback = { [weak self] in
+            self?.isSpeaking = false
+            self?.isPaused = false
+            self?.progress = 0
+            self?.currentText = ""
+            try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        }
+        del.onProgressCallback = { [weak self] range in
+            guard let self, self.totalLength > 0 else { return }
+            self.spokenLength = range.location + range.length
+            self.progress = Double(self.spokenLength) / Double(self.totalLength)
+        }
+        synth.delegate = del
+        delegate = del
         synthesizer = synth
     }
 
@@ -42,9 +42,7 @@ final class AudioService {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.playback, mode: .default, options: [.duckOthers])
             try session.setActive(true, options: [])
-        } catch {
-            print("AudioSession config error: \(error)")
-        }
+        } catch {}
     }
 
     func speak(_ text: String) {
@@ -112,30 +110,22 @@ final class AudioService {
     }
 }
 
-private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate {
-    let onFinish: () -> Void
-    let onProgress: (NSRange) -> Void
+nonisolated private final class SpeechDelegate: NSObject, AVSpeechSynthesizerDelegate, @unchecked Sendable {
+    var onFinishCallback: (@MainActor () -> Void)?
+    var onProgressCallback: (@MainActor (NSRange) -> Void)?
 
-    init(onFinish: @escaping () -> Void, onProgress: @escaping (NSRange) -> Void) {
-        self.onFinish = onFinish
-        self.onProgress = onProgress
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        let cb = onFinishCallback
+        Task { @MainActor in cb?() }
     }
 
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor in
-            self.onFinish()
-        }
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        let cb = onFinishCallback
+        Task { @MainActor in cb?() }
     }
 
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor in
-            self.onFinish()
-        }
-    }
-
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        Task { @MainActor in
-            self.onProgress(characterRange)
-        }
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
+        let cb = onProgressCallback
+        Task { @MainActor in cb?(characterRange) }
     }
 }
